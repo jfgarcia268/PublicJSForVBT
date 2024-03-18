@@ -23,8 +23,7 @@ VlocityUtils.report("Activating ALL FlexCards");
 
         const query = 'SELECT Id ' +
                       'FROM ' + package + 'VlocityCard__c ' +
-                      'WHERE ' + package + 'Active__c = true AND ' + package + "CardType__c = 'flex' ";
-                  //  'WHERE ' + package + 'Active__c = true AND ' + package + "CardType__c = 'flex' LIMIT 2 ";
+                      'WHERE ' + package + 'Active__c = true AND ' + package + "CardType__c = 'flex' AND vlocity_cmt__IsChildCard__c = false";
       
         const idsArray = await vlocity.jsForceConnection.query(query);
         //console.log(puppeteerOptions);

@@ -51,6 +51,7 @@ VlocityUtils.report("Activating ALL OmniScripts");
             let omniScriptId = idsArray.records[i].Id;
             let omniScriptName = idsArray.records[i].Name;
             await compileOSLWC(jobInfo, omniScriptId, omniScriptName, page, siteUrl, package);
+            VlocityUtils.report('Status:', (i+1) + '/' + idsArray.records.length + ' OmniScripts Compiled');
         }
 
         console.log(jobInfo.currentErrors);
