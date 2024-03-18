@@ -15,6 +15,7 @@ VlocityUtils.report("Activating ALL OmniScripts");
         jobInfo.ignoreLWCActivationOS = true;
     } else {
         jobInfo.currentErrors = [];
+        jobInfo.errors = [];
         let package = vlocity.namespacePrefix;
         let siteUrl = vlocity.jsForceConnection.instanceUrl;
         let sessionToken = vlocity.jsForceConnection.accessToken;
