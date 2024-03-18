@@ -1,6 +1,6 @@
 const path = require('path');
 var fs = require('fs');
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
 
 module.exports = async function(vlocity, currentContextData, jobInfo, callback) {
 
