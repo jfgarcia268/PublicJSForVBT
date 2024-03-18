@@ -43,78 +43,96 @@ VlocityUtils.report("Activating ALL FlexCards");
             page.waitForNavigation({ timeout: loginTimeout, waitUntil: 'networkidle2'}),
             page.goto(loginURl, {timeout: loginTimeout})
         ]);
+
+
+        const subLists = []
+        numTotalsubLists = Math.ceil(idsArray.records.length/50);
+        constars[0]= "Saab";
     
         let idsArrayString = '';
-        //console.log(idsArray.records.length);
+        let tempcount = 0;
         for (let i = 0; i < idsArray.records.length; i++) {
+            tempcount++;
             let cardId = idsArray.records[i].Id;
             idsArrayString = idsArrayString + cardId + ','
-        }
-        idsArrayString = idsArrayString.substring(0, idsArrayString.length - 1);
-
-
-        let flexCardCompilePage = siteUrl + '/apex/' + package + 'FlexCardCompilePage?id=' + idsArrayString;
-
-        VlocityUtils.report('Starting LWC Activation For all Flex Cards', ' Number of FlexCards to compile: ' +  idsArray.records.length);
-
-        VlocityUtils.report('LWC FlexCards Activation URL', flexCardCompilePage);
-
-        let errorMessage;
-        await page.goto(flexCardCompilePage, {timeout: loginTimeout});
-        await page.waitForTimeout(5000);
-        
-        let tries = 0;
-        let jsonError;
-        
-        let maxNumOfTries = Math.ceil((60/jobInfo.defaultLWCPullTimeInSeconds)*jobInfo.defaultMinToWaitForLWCFlexCards)*idsArray.records.length;
-        while (tries < maxNumOfTries && !jobInfo.ignoreLWCActivationCards) {
-            try {
-                let message;
-                try {
-                    message = await page.waitForSelector('#compileMessage-0');
-                } catch (messageTimeout) {
-                    VlocityUtils.verbose('Error', messageTimeout);
-                    VlocityUtils.log('FlexCards LWC Activation', 'Loading Page taking too long - Retrying - Tries: ' + tries + ' of ' + maxNumOfTries);
-                }
-                
-                if (message) { 
-                    let currentStatus = await message.evaluate(node => node.innerText);
-                    VlocityUtils.report('Activating LWC for All FlexCards', currentStatus);
-                    jobInfo.elapsedTime = VlocityUtils.getTime();
-                    VlocityUtils.report('Elapsed Time', jobInfo.elapsedTime);
-                    if (currentStatus === 'DONE SUCCESSFULLY') {
-                        VlocityUtils.success('LWC Activated','All LWC for FlexCards Activated');
-                        let jsonResulNode  = await page.waitForSelector('#resultJSON-0');
-                        let jsonResult = await jsonResulNode.evaluate(node => node.innerText);
-                        console.log(jsonResult);
-                        break;
-                    } else if (currentStatus === 'DONE WITH ERRORS') {
-                        let jsonResulNode  = await page.waitForSelector('#resultJSON-0');
-                        jsonError = await jsonResulNode.evaluate(node => node.innerText);
-                        //VlocityUtils.verbose('LWC FlexCards Compilation Error Result', jsonResulNode);
-                        console.log(jsonError);
-                        break;
-                    } 
-                }
-            } catch (e) {
-                VlocityUtils.error('Error Activating LWC',e);
+            if(tempcount=50){
+                idsArrayString = idsArrayString.substring(0, idsArrayString.length - 1);
+                subLists.push(idsArrayString); 
+                idsArrayString = '';
+                tempcount = 0;
             }
-            tries++;
-            await page.waitForTimeout(jobInfo.defaultLWCPullTimeInSeconds*1000);
         }
 
-        if (tries == maxNumOfTries) {
-            errorMessage = 'Activation took longer than ' + jobInfo.defaultMinToWaitForLWCFlexCards + ' minutes - Aborted';
-        }
-        
-        if (errorMessage) {
-            jobInfo.hasError = true;
-        }
-        browser.close();
+        for (let i = 0; i < subLists.records.length; i++) {
+            let currentList = subLists[i];
+            compileCards(jobInfo, currentList, page, siteUrl, package);
+        } 
     }
+    browser.close();
     callback();
 }
 
+
+compileCards = async function (jobInfo, idsArrayString, page, siteUrl, package) {
+    let flexCardCompilePage = siteUrl + '/apex/' + package + 'FlexCardCompilePage?id=' + idsArrayString;
+
+    VlocityUtils.report('Starting LWC Activation For Flex Cards', ' Number of FlexCards to compile: ' +  idsArray.records.length);
+
+    VlocityUtils.report('LWC FlexCards Activation URL', flexCardCompilePage);
+
+    let errorMessage;
+    await page.goto(flexCardCompilePage, {timeout: loginTimeout});
+    await page.waitForTimeout(5000);
+    
+    let tries = 0;
+    let jsonError;
+    
+    let maxNumOfTries = Math.ceil((60/jobInfo.defaultLWCPullTimeInSeconds)*jobInfo.defaultMinToWaitForLWCFlexCards)*idsArray.records.length;
+    while (tries < maxNumOfTries && !jobInfo.ignoreLWCActivationCards) {
+        try {
+            let message;
+            try {
+                message = await page.waitForSelector('#compileMessage-0');
+            } catch (messageTimeout) {
+                VlocityUtils.verbose('Error', messageTimeout);
+                VlocityUtils.log('FlexCards LWC Activation', 'Loading Page taking too long - Retrying - Tries: ' + tries + ' of ' + maxNumOfTries);
+            }
+            
+            if (message) { 
+                let currentStatus = await message.evaluate(node => node.innerText);
+                VlocityUtils.report('Activating LWC for All FlexCards', currentStatus);
+                jobInfo.elapsedTime = VlocityUtils.getTime();
+                VlocityUtils.report('Elapsed Time', jobInfo.elapsedTime);
+                if (currentStatus === 'DONE SUCCESSFULLY') {
+                    VlocityUtils.success('LWC Activated','All LWC for FlexCards Activated');
+                    let jsonResulNode  = await page.waitForSelector('#resultJSON-0');
+                    let jsonResult = await jsonResulNode.evaluate(node => node.innerText);
+                    console.log(jsonResult);
+                    break;
+                } else if (currentStatus === 'DONE WITH ERRORS') {
+                    let jsonResulNode  = await page.waitForSelector('#resultJSON-0');
+                    jsonError = await jsonResulNode.evaluate(node => node.innerText);
+                    //VlocityUtils.verbose('LWC FlexCards Compilation Error Result', jsonResulNode);
+                    console.log(jsonError);
+                    break;
+                } 
+            }
+        } catch (e) {
+            VlocityUtils.error('Error Activating LWC',e);
+        }
+        tries++;
+        await page.waitForTimeout(jobInfo.defaultLWCPullTimeInSeconds*1000);
+    }
+
+    if (tries == maxNumOfTries) {
+        errorMessage = 'Activation took longer than ' + jobInfo.defaultMinToWaitForLWCFlexCards + ' minutes - Aborted';
+    }
+    
+    if (errorMessage) {
+        jobInfo.hasError = true;
+    }
+
+}
 
 getPuppeteerOptions = async function (jobInfo) {
     let puppeteerOptions = { 
