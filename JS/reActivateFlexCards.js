@@ -23,7 +23,7 @@ VlocityUtils.report("Activating ALL FlexCards");
 
         const query = 'SELECT Id ' +
                       'FROM ' + package + 'VlocityCard__c ' +
-                      'WHERE ' + package + 'Active__c = true AND ' + package + "CardType__c = 'flex' LIMIT 2";
+                      'WHERE ' + package + 'Active__c = true AND ' + package + "CardType__c = 'flex' ";
       
         const idsArray = await vlocity.jsForceConnection.query(query);
         //console.log(puppeteerOptions);
@@ -85,8 +85,8 @@ VlocityUtils.report("Activating ALL FlexCards");
                     if (currentStatus === 'DONE SUCCESSFULLY') {
                         VlocityUtils.success('LWC Activated','All LWC for FlexCards Activated');
                         let jsonResulNode  = await page.waitForSelector('#resultJSON-0');
-                        jsonError = await jsonResulNode.evaluate(node => node.innerText);
-                        VlocityUtils.verbose('JSON Result: ', jsonResulNode);
+                        let jsonResult = await jsonResulNode.evaluate(node => node.innerText);
+                        console.log(jsonResult);
                         break;
                     } else if (currentStatus === 'DONE WITH ERRORS') {
                         let jsonResulNode  = await page.waitForSelector('#resultJSON-0');
@@ -104,21 +104,6 @@ VlocityUtils.report("Activating ALL FlexCards");
 
         if (tries == maxNumOfTries) {
             errorMessage = 'Activation took longer than ' + jobInfo.defaultMinToWaitForLWCFlexCards + ' minutes - Aborted';
-        }
-
-        if (jsonError) {
-            jobInfo.hasError = true;
-            let failedCards = JSON.parse(jsonError).failedCards;
-            let failedCardsIds = Object.keys(failedCards);
-            for (let i = 0; i < failedCardsIds.length; i++) {
-                let failedCardsId = failedCardsIds[i];
-                let errorMessageCard = failedCards[failedCardsId];
-                let cardKey = jobInfo.flexCardsToCompile[failedCardsId];
-                jobInfo.currentStatus[cardKey] = 'Error';
-                jobInfo.currentErrors[cardKey] = 'LWC Activation Error >> ' + cardKey + ' - ' + errorMessageCard;
-                jobInfo.errors.push('LWC Activation Error >> ' + cardKey + ' - ' + errorMessageCard);
-                VlocityUtils.error('LWC Activation Error', cardKey + ' - ' +  errorMessageCard);
-            }
         }
         
         if (errorMessage) {
