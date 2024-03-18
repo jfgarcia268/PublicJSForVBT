@@ -87,8 +87,8 @@ VlocityUtils.report("Activating ALL FlexCards");
                         break;
                     } else if (currentStatus === 'DONE WITH ERRORS') {
                         let jsonResulNode  = await page.waitForSelector('#resultJSON-0');
-                        jsonError = await jsonResulNode.evaluate(node => node.innerText);
-                        VlocityUtils.verbose('LWC FlexCards Compilation Error Result', jsonError);
+                        //jsonError = await jsonResulNode.evaluate(node => node.innerText);
+                        VlocityUtils.verbose('LWC FlexCards Compilation Error Result', jsonResulNode);
                         break;
                     } 
                 }
