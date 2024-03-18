@@ -14,7 +14,7 @@ VlocityUtils.report("Activating ALL OmniScripts");
         jobInfo.ignoreLWCActivationCards = true;
         jobInfo.ignoreLWCActivationOS = true;
     } else {
-        
+        jobInfo.currentErrors = [];
         let package = vlocity.namespacePrefix;
         let siteUrl = vlocity.jsForceConnection.instanceUrl;
         let sessionToken = vlocity.jsForceConnection.accessToken;
@@ -118,9 +118,7 @@ compileOSLWC = async function (jobInfo, omniScriptId, omniScriptKey, page, siteU
     }
 
     if (errorMessage) {
-        jobInfo.omniScriptLwcActivationSkip[omniScriptKey] = errorMessage;
         jobInfo.hasError = true;
-        jobInfo.currentStatus[omniScriptKey] = 'Error';
         jobInfo.currentErrors[omniScriptKey] = 'LWC Activation Error >> ' + omniScriptKey + ' - ' + errorMessage;
         jobInfo.errors.push('LWC Activation Error >> ' + omniScriptKey + ' - ' + errorMessage);
         VlocityUtils.error('LWC Activation Error', omniScriptKey + ' - ' + errorMessage);
