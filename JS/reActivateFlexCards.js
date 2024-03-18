@@ -24,6 +24,7 @@ VlocityUtils.report("Activating ALL FlexCards");
         const query = 'SELECT Id ' +
                       'FROM ' + package + 'VlocityCard__c ' +
                       'WHERE ' + package + 'Active__c = true AND ' + package + "CardType__c = 'flex' ";
+                  //  'WHERE ' + package + 'Active__c = true AND ' + package + "CardType__c = 'flex' LIMIT 2 ";
       
         const idsArray = await vlocity.jsForceConnection.query(query);
         //console.log(puppeteerOptions);
@@ -91,7 +92,8 @@ VlocityUtils.report("Activating ALL FlexCards");
                     } else if (currentStatus === 'DONE WITH ERRORS') {
                         let jsonResulNode  = await page.waitForSelector('#resultJSON-0');
                         jsonError = await jsonResulNode.evaluate(node => node.innerText);
-                        VlocityUtils.verbose('LWC FlexCards Compilation Error Result', jsonResulNode);
+                        //VlocityUtils.verbose('LWC FlexCards Compilation Error Result', jsonResulNode);
+                        console.log(jsonError);
                         break;
                     } 
                 }
@@ -108,17 +110,7 @@ VlocityUtils.report("Activating ALL FlexCards");
         
         if (errorMessage) {
             jobInfo.hasError = true;
-            let failedCardsIds = Object.keys(jobInfo.flexCardsToCompile);
-            for (let i = 0; i < failedCardsIds.length; i++) {
-                let failedCardsId = failedCardsIds[i];
-                let cardKey = jobInfo.flexCardsToCompile[failedCardsId];
-                jobInfo.currentStatus[cardKey] = 'Error';
-                //jobInfo.currentErrors[cardKey] = 'LWC Activation Error >> ' + cardKey + ' - ' + errorMessage;
-                jobInfo.errors.push('LWC Activation Error >> ' + cardKey + ' - ' + errorMessage);
-                VlocityUtils.error('LWC Activation Error', cardKey + ' - ' +  errorMessage);
-            }
         }
-        jobInfo.flexCardsToCompile = {};
         browser.close();
     }
     callback();
