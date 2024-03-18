@@ -133,7 +133,7 @@ VlocityUtils.report("Activating ALL FlexCards");
         jobInfo.flexCardsToCompile = {};
         browser.close();
     }
-    return;
+    callback();
 }
 
 
