@@ -23,7 +23,7 @@ VlocityUtils.report("Activating ALL FlexCards");
 
         const query = 'SELECT Id ' +
                       'FROM ' + package + 'VlocityCard__c ' +
-                      'WHERE ' + package + 'Active__c = true AND ' + package + "CardType__c = 'flex' ";
+                      'WHERE ' + package + 'Active__c = true AND ' + package + "CardType__c = 'flex' LIMIT 2";
       
         const idsArray = await vlocity.jsForceConnection.query(query);
         //console.log(puppeteerOptions);
@@ -84,10 +84,13 @@ VlocityUtils.report("Activating ALL FlexCards");
                     VlocityUtils.report('Elapsed Time', jobInfo.elapsedTime);
                     if (currentStatus === 'DONE SUCCESSFULLY') {
                         VlocityUtils.success('LWC Activated','All LWC for FlexCards Activated');
+                        let jsonResulNode  = await page.waitForSelector('#resultJSON-0');
+                        jsonError = await jsonResulNode.evaluate(node => node.innerText);
+                        VlocityUtils.verbose('JSON Result: ', jsonResulNode);
                         break;
                     } else if (currentStatus === 'DONE WITH ERRORS') {
                         let jsonResulNode  = await page.waitForSelector('#resultJSON-0');
-                        //jsonError = await jsonResulNode.evaluate(node => node.innerText);
+                        jsonError = await jsonResulNode.evaluate(node => node.innerText);
                         VlocityUtils.verbose('LWC FlexCards Compilation Error Result', jsonResulNode);
                         break;
                     } 
